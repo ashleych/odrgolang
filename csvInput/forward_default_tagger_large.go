@@ -1,60 +1,44 @@
-package main
+package csvInput
 
 import (
 	"bufio"
 	"encoding/csv"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
 )
 
-type Record struct {
-	CustID     int
-	FacID      int
-	ObsDate    time.Time
-	DPD        int
-	FwdDefault bool
-	LagDate time.Time
+func checkForwardDefaultTagEligibility(defaultedRecords []Record, obsDate time.Time) bool {
+	for _, record := range defaultedRecords {
+		// Check if obsDate is less than any of the lagDate values
+		if obsDate.After(record.LagDate) && obsDate.Before((record.ObsDate)) {
+			return true
+		}
+
+	}
+	return false
 }
 
-func forward_default_tagger_big_data() {
-	inputFilePath := "./default_flag_generated.csv"
-	defaultFilePath := "default_output_dataset_1.csv"
-	outputFilePath := "output_dataset_1.csv"
+func identify_defaults(inputFilePath string, defaultCustomerRecords map[int][]Record, outputFilePath string) {
+	// inputFilePath := "./default_flag_generated.csv"
+	// outputFilePath := "output_dataset_1.csv"
 
 	// Open and read the input dataset file
-	inputFile, err := os.Open(inputFilePath)
-	if err != nil {
-		fmt.Println("Error opening input file:", err)
-		return
-	}
-	defer inputFile.Close()
+	inputFile, _ := open_file(inputFilePath)
 
-	// Create and open the output dataset file for writing
-	outputFile, err := os.Create(outputFilePath)
-	if err != nil {
-		fmt.Println("Error creating output file:", err)
-		return
-	}
-	defer outputFile.Close()
-	defaultFile, err := os.Create(defaultFilePath)
-	if err != nil {
-		fmt.Println("Error creating output file:", err)
-		return
-	}
+	defer inputFile.Close()
+	defaultFile, _ := create_file(outputFilePath)
+
 	defer defaultFile.Close()
 
-	// Initialize a CSV writer for the output file
-	csvWriter := csv.NewWriter(outputFile)
 	defaultCsvWriter := csv.NewWriter(defaultFile)
-	defer csvWriter.Flush()
+	// defer csvWriter.Flush()
 	defer defaultCsvWriter.Flush()
 
+	headers := [...]string{"CustID", "FacID", "ObsDate", "DPD", "FwdDefault", "LagDate"}
+	defaultCsvWriter.Write(headers[:]) // Write the headers to the CSV file
 	// Initialize a map to store records for each customer
-	customerRecords := make(map[int][]Record)
-	defaultCustomerRecords := make(map[int][]Record)
 
 	scanner := bufio.NewScanner(inputFile)
 	defaultCount := 0
@@ -86,8 +70,8 @@ func forward_default_tagger_big_data() {
 				FacID:      facID,
 				ObsDate:    obsDate,
 				DPD:        dpd,
-				FwdDefault: false, // Initialize to false
-				LagDate: obsDate.AddDate(0,-12,0),
+				FwdDefault: false,                      // Initialize to false
+				LagDate:    obsDate.AddDate(0, -12, 0), //Find date 12 months prior, assuming observaton window is 12 months
 
 			}
 			if record.DPD > 90 {
@@ -96,35 +80,15 @@ func forward_default_tagger_big_data() {
 			// Store the record in the map for the corresponding customer
 			defaultCustomerRecords[custID] = append(defaultCustomerRecords[custID], record)
 
-		writeRecordToCSV(record,defaultCsvWriter)
+			writeRecordToCSV(record, defaultCsvWriter)
 			// Process the record as needed (e.g., store it, print it, etc.)
 			// fmt.Printf("CustID: %d, FacID: %d, ObsDate: %s, DPD: %d, FwdDefault: %v\n", record.CustID, record.FacID, record.ObsDate, record.DPD, record.FwdDefault)
 		}
 		if err := scanner.Err(); err != nil {
 			fmt.Println("Error reading input file:", err)
 		}
-		// var wg sync.WaitGroup
-		// for _, records := range customerRecords {
-		// 	wg.Add(1)
-		// 	go func(records []Record) {
-		// 		defer wg.Done()
-		// 		checkForwardDefaults(records)
-		// 	}(records)
-		// }
-
-		// // Wait for all workers to finish
-		// wg.Wait()
-		// // Check for forward defaults for each customer
-		// // checkForwardDefaults(customerRecords)
-		// // fmt.Println("Output being printed")
-		// // printCustomerRecords(customerRecords)
-		// // Write the records to the output CSV file
-		// writeRecordsToCSV(customerRecords, csvWriter)
 	}
 
-		fmt.Println("Finished reading")
-		fmt.Println("Def count", defaultCount)
-		fmt.Println("Customerrecords", customerRecords)
 }
 
 func printCustomerRecords(customerRecords map[int][]Record) {
@@ -176,12 +140,15 @@ func writeRecordsToCSV(customerRecords map[int][]Record, csvWriter *csv.Writer) 
 }
 
 func writeRecordToCSV(customerRecord Record, csvWriter *csv.Writer) {
-			csvWriter.Write([]string{
-				strconv.Itoa(customerRecord.CustID),
-				strconv.Itoa(customerRecord.FacID),
-				customerRecord.ObsDate.Format("2-Jan-06"),
-				strconv.Itoa(customerRecord.DPD),
-				strconv.FormatBool(customerRecord.FwdDefault),
-				customerRecord.LagDate.Format("2-Jan-06"),
-			})
+	csvWriter.Write([]string{
+		strconv.Itoa(customerRecord.CustID),
+		strconv.Itoa(customerRecord.FacID),
+		customerRecord.ObsDate.Format("2-Jan-06"),
+		strconv.Itoa(customerRecord.DPD),
+		strconv.FormatBool(customerRecord.FwdDefault),
+		customerRecord.LagDate.Format("2-Jan-06"),
+	})
+}
+func writeHeaderToCSV(header, csvWriter *csv.Writer) {
+
 }

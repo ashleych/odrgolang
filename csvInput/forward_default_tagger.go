@@ -1,4 +1,4 @@
-package main
+package csvInput
 
 import (
 	"bufio"
@@ -9,6 +9,16 @@ import (
 	"strings"
 	"time"
 )
+
+type Record struct {
+	CustID         int
+	FacID          int
+	ObsDate        time.Time
+	DPD            int
+	FwdDefault     bool
+	LagDate        time.Time
+	FwdDefaultDate time.Time
+}
 func forward_default_tagger() {
 	inputFilePath := "./default_flag_generated.csv"
 	outputFilePath := "output_dataset_1.csv"

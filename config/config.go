@@ -1,0 +1,2 @@
+package config
+const DEFAULT_DEFINITION_IN_DPD =90

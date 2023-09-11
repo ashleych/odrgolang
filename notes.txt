@@ -1,0 +1,70 @@
+This is the dataset that needs to be read 
+Cust_ID,Fac_ID,Obs_Date,DPD_new
+1,1,31-Jan-14,37
+1,1,28-Feb-14,79
+1,1,31-Mar-14,101
+1,1,30-Apr-14,90
+1,1,31-May-14,50
+1,1,30-Jun-14,80
+1,1,31-Jul-14,37
+1,1,31-Aug-14,15
+1,1,30-Sep-14,84
+1,1,31-Oct-14,45
+1,1,30-Nov-14,78
+1,1,31-Dec-14,73
+1,1,31-Jan-15,82
+1,1,28-Feb-15,83
+1,1,31-Mar-15,78
+1,1,30-Apr-15,88
+1,1,31-May-15,77
+1,1,30-Jun-15,101
+1,2,31-Jan-14,40
+1,2,28-Feb-14,82
+1,2,31-Mar-14,110
+1,2,30-Apr-14,90
+1,2,31-May-14,50
+1,2,30-Jun-14,80
+1,2,31-Jul-14,37
+1,2,31-Aug-14,15
+1,2,30-Sep-14,84
+1,2,31-Oct-14,45
+1,2,30-Nov-14,78
+1,2,31-Dec-14,73
+1,2,31-Jan-15,82
+1,2,28-Feb-15,83
+1,2,31-Mar-15,78
+1,2,30-Apr-15,78
+1,2,31-May-15,78
+1,2,30-Jun-15,78
+2,1,31-Jan-14,74
+2,1,28-Feb-14,74
+2,1,31-Mar-14,70
+2,1,30-Apr-14,96
+2,1,31-May-14,73
+2,1,30-Jun-14,88
+2,1,31-Jul-14,86
+2,1,31-Aug-14,94
+2,1,30-Sep-14,90
+2,1,31-Oct-14,99
+2,1,30-Nov-14,71
+2,1,31-Dec-14,100
+2,1,31-Jan-15,93
+2,1,28-Feb-15,94
+
+The test for default status is if the DPD is greater than 90
+a forward default flag becomes true if a customer observation for any row has a default status in the next 12 months, in which case it is to be tagged with fwd_default_flag as True  
+
+
+The objective is to check for each customer, if there a default flag in in the next 12 months 
+
+
+fwdODR <-
+  custODR_Data[custODR_Data, on = .(Country,Portfolio.Name, Customer.Id, Date > Date,  Date <= fwdmonth), .(
+    fwdDPD = max(DPDCust),
+    fwdFapStatus = max(fapdefStatusCust),
+    DPDdefaultDate = x.Date[which.max(DPDCust)],
+    fapdefaultDate = x.Date[which.max(fapdefStatusCust)],
+    fwdDefStatus_1 = max(defStatusCust),
+    defaultDate_1 = x.Date[which.max(defStatusCust)],
+    i.Date
+  ), by = .EACHI,,nomatch=0] 

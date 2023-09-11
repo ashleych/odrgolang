@@ -1,4 +1,4 @@
-package main
+package dataCreation
 
 import (
 	"fmt"

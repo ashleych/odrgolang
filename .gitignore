@@ -1,0 +1,5 @@
+.vscode/
+*.mod
+go.sum
+*.db
+*.csv

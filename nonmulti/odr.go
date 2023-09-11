@@ -17,7 +17,6 @@ type Record struct {
     DPD           int
     FwdDefault    bool
 }
-
 func Old_forward_def_tagger() {
     inputFilePath := "./default_flag_generated.csv"
     outputFilePath := "output_dataset.csv"
