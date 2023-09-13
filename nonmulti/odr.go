@@ -87,13 +87,13 @@ func Old_forward_def_tagger() {
     }
 
     // Check for forward defaults for each customer
-    checkForwardDefaults(customerRecords)
+    CheckForwardDefaults(customerRecords)
 
     // Write the records to the output CSV file
     writeRecordsToCSV(customerRecords, csvWriter)
 }
 
-func checkForwardDefaults(customerRecords map[int][]Record) {
+func CheckForwardDefaults(customerRecords map[int][]Record) {
     for _, records := range customerRecords {
         for i := range records {
             // Check if the current record is within the next 12 months

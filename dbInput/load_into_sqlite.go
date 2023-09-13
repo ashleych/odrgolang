@@ -22,6 +22,7 @@ type CustomerRecord struct {
 	DPD        int
 	FwdDefault bool
 	LagDate time.Time
+	FwdDefaultDate time.Time
 }
 
 func parseRecord(recordFields []string) CustomerRecord {
@@ -97,7 +98,7 @@ func MigrateToDb(csvFilePath string) {
 	}
 	defer file.Close()
 	recordCount := 0
-	batchSize := 5000 // Adjust this as needed
+	batchSize := 2000 // Adjust this as needed
 	recordsToInsert := make([]CustomerRecord, 0, batchSize)
 	targetIncrement := 10000
 	// Create a CSV reader
@@ -260,10 +261,11 @@ func migrateToDb_concurrent(csvFilePath string) {
 
 
 
-func GenerateDataAndMigrateToDB() {
+func GenerateDataAndMigrateToDB(customerCount int) {
 
-	customerCount := 1000 
+	// customerCount := 1000 
 	dataCreation.GenerateDummyData(customerCount)
+	fmt.Println("Data in CSV created")
 	// go checkExpire()
 	// http.HandleFunc("/", handler) // http://127.0.0.1:8080/Go
 	// http.ListenAndServe(":8080", nil)
